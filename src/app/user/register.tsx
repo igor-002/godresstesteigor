@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -13,17 +13,20 @@ type FormData = {
 
 const registerSchema = yup.object({
     name: yup.string().required('Nome é obrigatório'),
-    surname: yup.string(),
+    surname: yup.string().required('Sobrenome é obrigatório'),
     email: yup.string().email('Email inválido').required('Email é obrigatório'),
     password: yup.string()
-        .required('Senha é obrigatória')
-        .min(8, 'Senha deve ter pelo menos 8 caracteres')
-        .matches(/[A-Z]/, "A senha deve conter pelo menos uma letra maiúscula")
-        .matches(/[0-9]/, "A senha deve conter pelo menos um número")
-        .matches(/[!@#$%^&*(),.?":{}|<>_-]/, "A senha deve conter pelo menos um carctere especial")
+        .min(6, 'Senha deve ter pelo menos 6 caracteres')
+        .matches(/[A-Z]/, 'Senha deve conter pelo menos uma letra maiúscula')
+        .matches(/[a-z]/, 'Senha deve conter pelo menos uma letra minúscula')
+        .matches(/[0-9]/, 'Senha deve conter pelo menos um número')
+        .matches(/[!@#$%^&*(),.?":{}|<>-_]/, 'Senha deve conter pelo menos um caractere especial')
+        .required('Senha é obrigatória'),
 }).required();
 
 export default function Register() {
+    const [submittedData, setSubmittedData] = useState<FormData | null>(null);
+
     const form = useForm<FormData>({
         defaultValues: {
             name: "",
@@ -37,7 +40,8 @@ export default function Register() {
     const { handleSubmit, control, formState: { errors } } = form;
 
     const onSubmit: SubmitHandler<FormData> = (data) => {
-        console.log(data);
+        setSubmittedData(data);
+        console.log(data)
     };
 
     return (
@@ -110,6 +114,16 @@ export default function Register() {
             <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
                 <Text style={{ color: "#fff", fontWeight: "500" }}>Cadastrar-se</Text>
             </TouchableOpacity>
+
+            {submittedData && (
+                <View style={styles.resultContainer}>
+                    <Text style={{ fontWeight: 500, marginBottom: 10 }}>Dados enviados para o banco:</Text>
+                    <Text style={styles.resultText}>"name": "{submittedData.name}"</Text>
+                    <Text style={styles.resultText}>"surname": "{submittedData.surname}"</Text>
+                    <Text style={styles.resultText}>"email": "{submittedData.email}"</Text>
+                    <Text style={styles.resultText}>"password": "{submittedData.password}"</Text>
+                </View>
+            )}
         </View>
     );
 }
@@ -144,5 +158,16 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start',
         fontSize: 10,
         fontWeight: '500'
-    }
+    },
+    resultContainer: {
+        marginTop: 20,
+        padding: 10,
+        borderRadius: 5,
+        backgroundColor: '#f5f5f5',
+        width: '100%',
+        gap: 10
+    },
+    resultText: {
+        fontSize: 14,
+    },
 });
