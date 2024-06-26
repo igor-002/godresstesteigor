@@ -4,6 +4,8 @@ import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
+import Api from '@/src/services/api';
+
 type FormData = {
     name: string;
     surname: string;
@@ -20,12 +22,12 @@ const registerSchema = yup.object({
         .matches(/[A-Z]/, 'Senha deve conter pelo menos uma letra maiúscula')
         .matches(/[a-z]/, 'Senha deve conter pelo menos uma letra minúscula')
         .matches(/[0-9]/, 'Senha deve conter pelo menos um número')
-        .matches(/[!@#$%^&*(),.?":{}|<>-_]/, 'Senha deve conter pelo menos um caractere especial')
+        .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Senha deve conter pelo menos um caractere especial')
         .required('Senha é obrigatória'),
 }).required();
 
 export default function Register() {
-    const [submittedData, setSubmittedData] = useState<FormData | null>(null);
+    const [resultData, setResultData] = useState(null);
 
     const form = useForm<FormData>({
         defaultValues: {
@@ -37,11 +39,21 @@ export default function Register() {
         resolver: yupResolver(registerSchema),
     });
 
-    const { handleSubmit, control, formState: { errors } } = form;
+    const { handleSubmit, control, formState: { errors }, reset } = form;
 
-    const onSubmit: SubmitHandler<FormData> = (data) => {
-        setSubmittedData(data);
-        console.log(data)
+    const onSubmit: SubmitHandler<FormData> = async (data) => {
+        await Api.post('/api/auth/register', {
+            ...data
+        })
+            .then(function (response) {
+                console.log(response.data)
+                setResultData(response.data.msg);
+                reset();
+            })
+            .catch(function (error) {
+                console.log(error.response.data);
+                setResultData(error.response.data.msg);
+            });
     };
 
     return (
@@ -115,13 +127,10 @@ export default function Register() {
                 <Text style={{ color: "#fff", fontWeight: "500" }}>Cadastrar-se</Text>
             </TouchableOpacity>
 
-            {submittedData && (
+            {resultData && (
                 <View style={styles.resultContainer}>
-                    <Text style={{ fontWeight: 500, marginBottom: 10 }}>Dados enviados para o banco:</Text>
-                    <Text style={styles.resultText}>"name": "{submittedData.name}"</Text>
-                    <Text style={styles.resultText}>"surname": "{submittedData.surname}"</Text>
-                    <Text style={styles.resultText}>"email": "{submittedData.email}"</Text>
-                    <Text style={styles.resultText}>"password": "{submittedData.password}"</Text>
+                    <Text style={{ fontWeight: 500, marginBottom: 10 }}>Status:</Text>
+                    <Text style={styles.resultText}>{resultData}</Text>
                 </View>
             )}
         </View>
