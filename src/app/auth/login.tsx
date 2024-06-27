@@ -2,37 +2,28 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useRouter } from 'expo-router';
 import * as yup from 'yup';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import Api from '@/src/services/api';
+import Api from '@/src/services/api';   
 
 type FormData = {
-    name: string;
-    surname: string;
     email: string;
     password: string;
 }
 
 const registerSchema = yup.object({
-    name: yup.string().required('Nome é obrigatório'),
-    surname: yup.string().required('Sobrenome é obrigatório'),
     email: yup.string().email('Email inválido').required('Email é obrigatório'),
-    password: yup.string()
-        .min(6, 'Senha deve ter pelo menos 6 caracteres')
-        .matches(/[A-Z]/, 'Senha deve conter pelo menos uma letra maiúscula')
-        .matches(/[a-z]/, 'Senha deve conter pelo menos uma letra minúscula')
-        .matches(/[0-9]/, 'Senha deve conter pelo menos um número')
-        .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Senha deve conter pelo menos um caractere especial')
-        .required('Senha é obrigatória'),
+    password: yup.string().required('Senha é obrigatória'),
 }).required();
 
-export default function Register() {
+export default function Login() {
     const [resultData, setResultData] = useState(null);
+    const router = useRouter();
 
     const form = useForm<FormData>({
         defaultValues: {
-            name: "",
-            surname: "",
             email: "",
             password: ""
         },
@@ -42,52 +33,29 @@ export default function Register() {
     const { handleSubmit, control, formState: { errors }, reset } = form;
 
     const onSubmit: SubmitHandler<FormData> = async (data) => {
-        await Api.post('/api/auth/register', {
+        await Api.post('/auth/login', {
             ...data
         })
-            .then(function (response) {
-                console.log(response.data)
+            .then(async function (response) {
+                console.log(response.data);
                 setResultData(response.data.msg);
                 reset();
+
+                const { id, token } = response.data;
+                await AsyncStorage.setItem('jwtToken', token);
+                await AsyncStorage.setItem('userId', id);
+
+                router.push('user/home');
             })
             .catch(function (error) {
                 console.log(error.response.data);
                 setResultData(error.response.data.msg);
             });
+        
     };
 
     return (
         <View style={styles.container}>
-            <Controller
-                control={control}
-                name="name"
-                render={({ field: { value, onChange } }) => (
-                    <>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Nome"
-                            onChangeText={onChange}
-                            value={value}
-                        />
-                        {errors.name && <Text style={styles.error}>{errors.name.message}</Text>}
-                    </>
-                )}
-            />
-            <Controller
-                control={control}
-                name="surname"
-                render={({ field: { value, onChange } }) => (
-                    <>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Sobrenome"
-                            onChangeText={onChange}
-                            value={value}
-                        />
-                        {errors.surname && <Text style={styles.error}>{errors.surname.message}</Text>}
-                    </>
-                )}
-            />
             <Controller
                 control={control}
                 name="email"
@@ -124,7 +92,7 @@ export default function Register() {
 
 
             <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
-                <Text style={{ color: "#fff", fontWeight: "500" }}>Cadastrar-se</Text>
+                <Text style={{ color: "#fff", fontWeight: "500" }}>Entrar</Text>
             </TouchableOpacity>
 
             {resultData && (
