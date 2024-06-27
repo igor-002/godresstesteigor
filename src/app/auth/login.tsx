@@ -2,80 +2,59 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { router, Link } from 'expo-router';
 import * as yup from 'yup';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import Api from '@/src/services/api';
 
 type FormData = {
-    name: string;
-    surname: string;
     email: string;
     password: string;
 }
 
 const registerSchema = yup.object({
-    name: yup.string().required('Nome é obrigatório'),
-    surname: yup.string().required('Sobrenome é obrigatório'),
     email: yup.string().email('Email inválido').required('Email é obrigatório'),
-    password: yup.string()
-        .min(6, 'Senha deve ter pelo menos 6 caracteres')
-        .matches(/[A-Z]/, 'Senha deve conter pelo menos uma letra maiúscula')
-        .matches(/[a-z]/, 'Senha deve conter pelo menos uma letra minúscula')
-        .matches(/[0-9]/, 'Senha deve conter pelo menos um número')
-        .matches(/[!@#$%^&*(),.?":{}|<>-_]/, 'Senha deve conter pelo menos um caractere especial')
-        .required('Senha é obrigatória'),
+    password: yup.string().required('Senha é obrigatória'),
 }).required();
 
-export default function Register() {
-    const [submittedData, setSubmittedData] = useState<FormData | null>(null);
+export default function Login() {
+    const [resultData, setResultData] = useState(null);
 
     const form = useForm<FormData>({
         defaultValues: {
-            name: "",
-            surname: "",
             email: "",
             password: ""
         },
         resolver: yupResolver(registerSchema),
     });
 
-    const { handleSubmit, control, formState: { errors } } = form;
+    const { handleSubmit, control, formState: { errors }, reset } = form;
 
-    const onSubmit: SubmitHandler<FormData> = (data) => {
-        setSubmittedData(data);
-        console.log(data)
+    const onSubmit: SubmitHandler<FormData> = async (data) => {
+        await Api.post('/auth/login', {
+            ...data
+        })
+            .then(async function (response) {
+                console.log(response.data);
+                setResultData(response.data.msg);
+                reset();
+
+                const { id, token } = response.data;
+                await AsyncStorage.setItem('jwtToken', token);
+                await AsyncStorage.setItem('userId', id);
+
+                router.replace('user/home');
+            })
+            .catch(function (error) {
+                console.log(error.response.data);
+                setResultData(error.response.data.msg);
+            });
+
     };
 
     return (
         <View style={styles.container}>
-            <Controller
-                control={control}
-                name="name"
-                render={({ field: { value, onChange } }) => (
-                    <>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Nome"
-                            onChangeText={onChange}
-                            value={value}
-                        />
-                        {errors.name && <Text style={styles.error}>{errors.name.message}</Text>}
-                    </>
-                )}
-            />
-            <Controller
-                control={control}
-                name="surname"
-                render={({ field: { value, onChange } }) => (
-                    <>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Sobrenome"
-                            onChangeText={onChange}
-                            value={value}
-                        />
-                        {errors.surname && <Text style={styles.error}>{errors.surname.message}</Text>}
-                    </>
-                )}
-            />
             <Controller
                 control={control}
                 name="email"
@@ -110,18 +89,18 @@ export default function Register() {
                 )}
             />
 
-
-            <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
-                <Text style={{ color: "#fff", fontWeight: "500" }}>Cadastrar-se</Text>
+            <TouchableOpacity>
+                <Link href={"/auth/forgotPassword/sendEmail"} style={{ textDecorationLine: "underline" }}>Esqueci a senha</Link>
             </TouchableOpacity>
 
-            {submittedData && (
+            <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
+                <Text style={{ color: "#fff", fontWeight: "500" }}>Entrar</Text>
+            </TouchableOpacity>
+
+            {resultData && (
                 <View style={styles.resultContainer}>
-                    <Text style={{ fontWeight: 500, marginBottom: 10 }}>Dados enviados para o banco:</Text>
-                    <Text style={styles.resultText}>"name": "{submittedData.name}"</Text>
-                    <Text style={styles.resultText}>"surname": "{submittedData.surname}"</Text>
-                    <Text style={styles.resultText}>"email": "{submittedData.email}"</Text>
-                    <Text style={styles.resultText}>"password": "{submittedData.password}"</Text>
+                    <Text style={{ fontWeight: 500, marginBottom: 10 }}>Status:</Text>
+                    <Text style={styles.resultText}>{resultData}</Text>
                 </View>
             )}
         </View>
@@ -131,7 +110,6 @@ export default function Register() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: "center",
         justifyContent: "center",
         paddingVertical: 40,
         paddingHorizontal: 20,

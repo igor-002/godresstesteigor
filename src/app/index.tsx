@@ -9,8 +9,8 @@ export default function Index() {
                 <Text>backend - frontend</Text>
             </View>
             <View style={styles.subcontainer}>
-                <Link href={"/user/login"} style={styles.button}>Login</Link>
-                <Link href={"/user/register"} style={styles.button}>Registro</Link>
+                <Link href={"/auth/login"} style={styles.button}>Login</Link>
+                <Link href={"/auth/register"} style={styles.button}>Registro</Link>
             </View>
             <Text style={{ color: "grey", fontSize: 10 }}>powered by GoDress</Text> 
         </View>
