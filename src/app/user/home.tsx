@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 
 import Api from '@/src/services/api';
 
@@ -9,7 +9,6 @@ export default function Home() {
 
     const [name, setName] = useState<string | null>(null)
     const [surname, setSurname] = useState<string | null>(null)
-    const router = useRouter();
 
     async function getUser() {
         const token = await AsyncStorage.getItem('jwtToken');
@@ -26,7 +25,7 @@ export default function Home() {
                 setSurname(response.data.user.surname)
             })
             .catch(function (error) {
-                console.log(error)
+                console.log(error.response.data)
                 router.replace('/auth/login')
             })
 

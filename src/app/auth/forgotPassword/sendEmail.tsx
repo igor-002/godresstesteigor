@@ -10,21 +10,18 @@ import Api from '@/src/services/api';
 
 type FormData = {
     email: string;
-    password: string;
 }
 
 const registerSchema = yup.object({
-    email: yup.string().email('Email inválido').required('Email é obrigatório'),
-    password: yup.string().required('Senha é obrigatória'),
+    email: yup.string().email('Email inválido').required('Email é obrigatório')
 }).required();
 
-export default function Login() {
+export default function sendEmail() {
     const [resultData, setResultData] = useState(null);
 
     const form = useForm<FormData>({
         defaultValues: {
-            email: "",
-            password: ""
+            email: ""
         },
         resolver: yupResolver(registerSchema),
     });
@@ -32,20 +29,18 @@ export default function Login() {
     const { handleSubmit, control, formState: { errors }, reset } = form;
 
     const onSubmit: SubmitHandler<FormData> = async (data) => {
-        await Api.post('/auth/login', {
+        await Api.post('/auth/forgot_password', {
             ...data
         })
             .then(async function (response) {
                 console.log(response.data);
                 setResultData(response.data.msg);
-                reset();
+                reset();     
 
-                const { id, token } = response.data;
-                await AsyncStorage.setItem('jwtToken', token);
-                await AsyncStorage.setItem('userId', id);
+                await AsyncStorage.setItem('userEmail', data.email)
 
-                router.replace('user/home');
-            })
+                router.navigate('/auth/forgotPassword/resetPassword')
+           })
             .catch(function (error) {
                 console.log(error.response.data);
                 setResultData(error.response.data.msg);
@@ -55,6 +50,10 @@ export default function Login() {
 
     return (
         <View style={styles.container}>
+            <View>
+                <Text style={{ fontWeight: "600" }}>Esqueceu a senha?</Text>
+                <Text>Sem problemas, enviaremos um email de alteração de senha para você.</Text>
+            </View>
             <Controller
                 control={control}
                 name="email"
@@ -71,30 +70,9 @@ export default function Login() {
                     </>
                 )}
             />
-            <Controller
-                control={control}
-                name="password"
-                render={({ field: { value, onChange } }) => (
-                    <>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Senha"
-                            onChangeText={onChange}
-                            value={value}
-                            secureTextEntry={true}
-                            autoCapitalize="none"
-                        />
-                        {errors.password && <Text style={styles.error}>{errors.password.message}</Text>}
-                    </>
-                )}
-            />
-
-            <TouchableOpacity>
-                <Link href={"/auth/forgotPassword/sendEmail"} style={{ textDecorationLine: "underline" }}>Esqueci a senha</Link>
-            </TouchableOpacity>
-
+            
             <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
-                <Text style={{ color: "#fff", fontWeight: "500" }}>Entrar</Text>
+                <Text style={{ color: "#fff", fontWeight: "500" }}>Enviar</Text>
             </TouchableOpacity>
 
             {resultData && (
