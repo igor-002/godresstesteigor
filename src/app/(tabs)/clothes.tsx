@@ -1,23 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5"
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import Teste1 from '../components/teste-topTab/teste';
-import Teste2 from '../components/teste-topTab/teste2';
-
-const Tab = createMaterialTopTabNavigator();
-
-function TClothes() {
-    return (
-        <View style={{ marginTop: 20 }}>
-            <Tab.Navigator>
-                <Tab.Screen name="Teste 1" component={Teste1} />
-                <Tab.Screen name="Teste 2" component={Teste2} />
-            </Tab.Navigator >
-        </View>
-    );
-}
-
+import TopTabs from '../components/topTabs/tobTabs';
 
 export default function Clothes() {
     return (
@@ -29,7 +13,7 @@ export default function Clothes() {
                 </TouchableOpacity>
             </View>
 
-            <TClothes />
+            <TopTabs />
         </View>
     );
 }
