@@ -10,7 +10,7 @@ export default function Layout() {
             <Stack.Screen name="auth/forgotPassword/sendEmail" options={{ title: "Esqueci a senha" }} />
             <Stack.Screen name="auth/forgotPassword/resetPassword" options={{ headerShown: false }} />
             
-            <Stack.Screen name="user/home" options={{ headerShown: false }}/>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }}/>
         </Stack>
     );
 }
