@@ -303,6 +303,6 @@ const styles = StyleSheet.create({
         color: 'red',
         alignSelf: 'flex-start',
         fontSize: 10,
-        fontWeight: '500'
+        fontWeight: "500"
     },
 });

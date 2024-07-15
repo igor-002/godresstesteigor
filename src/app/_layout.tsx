@@ -11,6 +11,8 @@ export default function Layout() {
             <Stack.Screen name="auth/forgotPassword/resetPassword" options={{ headerShown: false }} />
 
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
+            <Stack.Screen name="components/camera/camera" options={{ headerShown: false }} />
         </Stack>
     );
 }

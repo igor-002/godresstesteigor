@@ -98,7 +98,7 @@ export default function Login() {
 
             {resultData && (
                 <View style={styles.resultContainer}>
-                    <Text style={{ fontWeight: 500, marginBottom: 10 }}>Status:</Text>
+                    <Text style={{ fontWeight: "500", marginBottom: 10 }}>Status:</Text>
                     <Text style={styles.resultText}>{resultData}</Text>
                 </View>
             )}
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
         color: 'red',
         alignSelf: 'flex-start',
         fontSize: 10,
-        fontWeight: '500'
+        fontWeight: "500"
     },
     resultContainer: {
         marginTop: 20,

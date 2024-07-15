@@ -5,7 +5,7 @@ export default function Index() {
     return (
         <View style={styles.container}>
             <View style={styles.subcontainer}>
-                <Text style={{ fontSize: 26, fontWeight: 700, color:"#593C9D" }}>Teste de integração</Text>
+                <Text style={{ fontSize: 26, fontWeight: "700", color:"#593C9D" }}>Teste de integração</Text>
                 <Text>backend - frontend</Text>
             </View>
             <View style={styles.subcontainer}>
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         paddingVertical: 10,
         color: "#fff",
-        fontWeight: 500,
+        fontWeight: "500",
         width: "100%",
         textAlign: "center"
     }

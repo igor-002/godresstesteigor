@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5"
 import TopTabs from '../components/topTabs/tobTabs';
+import { Link, router } from 'expo-router'; 
 
 export default function Clothes() {
     return (
@@ -9,7 +10,9 @@ export default function Clothes() {
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                 <Text style={styles.title}>Armário</Text>
                 <TouchableOpacity>
-                    <FontAwesome5 name="camera" size={22} />
+                    <Link href={'/components/camera/camera'}>  
+                        <FontAwesome5 name="camera" size={22} />
+                    </Link>
                 </TouchableOpacity>
             </View>
 
