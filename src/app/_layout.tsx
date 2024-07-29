@@ -12,7 +12,7 @@ export default function Layout() {
 
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
-            <Stack.Screen name="components/camera/camera" options={{ headerShown: false }} />
+            <Stack.Screen name="clothes/addClothing" options={{ headerShown: false }} />
         </Stack>
     );
 }

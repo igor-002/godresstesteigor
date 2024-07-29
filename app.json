@@ -16,7 +16,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera."
-      }
+      },
+      "bundleIdentifier": "com.gttolla.frontendtestes"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +25,8 @@
         "backgroundColor": "#ffffff"
       },
       "permissions": [
-        "android.permission.CAMERA"
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ],
       "package": "com.gttolla.frontendtestes"
     },
@@ -46,6 +48,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "2a7862e3-1b0b-40a2-89af-a302a760f850"
+      }
+    },
+    "owner": "gttolla"
   }
 }

@@ -7,16 +7,13 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
-import Api from '@/src/services/api';
+import { Category } from '@/src/services/types/types';
+import { getCats } from '@/src/services/cats';
 import Modal from '../components/modals/modal';
 import ModalScreen from '../components/modals/modalScreen';
+import Api from '@/src/services/api';
 
 type FormData = {
-    name: string;
-};
-
-type Category = {
-    _id: string;
     name: string;
 };
 
@@ -30,7 +27,7 @@ export default function Home() {
     const [surname, setSurname] = useState<string | null>(null);
 
     // getCat
-    const [cats, setCats] = useState<Category[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
 
     // modals
     const [modalOpen, setModalOpen] = useState(false);
@@ -71,23 +68,12 @@ export default function Home() {
                 console.log(response.data);
                 setModalOpen(false);
                 setResultData(null);
-                getCats();
+                getCategories();
                 reset();
             })
             .catch(error => {
                 console.log(error.response.data);
                 setResultData(error.response.data.msg);
-            });
-    };
-
-    const getCats = async () => {
-        await Api.get('/cat')
-            .then(response => {
-                console.log(response);
-                setCats(response.data);
-            })
-            .catch(error => {
-                console.log(error.response.data);
             });
     };
 
@@ -97,7 +83,7 @@ export default function Home() {
                 console.log(response.data);
                 setResultData(null);
                 setCatScreenOpen(false);
-                getCats();
+                getCategories();
             })
             .catch(error => {
                 console.log(error.response.data);
@@ -110,16 +96,26 @@ export default function Home() {
             .then(response => {
                 console.log(response.data);
                 setCatScreenOpen(false);
-                getCats();
+                getCategories();
             })
             .catch(error => {
                 console.log(error.response.data);
             })
     }
 
+    const getCategories = async () => {
+        try {
+            const cats = await getCats();
+            setCategories(cats)
+        }
+        catch (error) {
+            console.log(error)
+        }
+    }
+
     useEffect(() => {
         getUser();
-        getCats();
+        getCategories()
     }, []);
 
     const handleLogout = async () => {
@@ -149,7 +145,7 @@ export default function Home() {
                     </TouchableOpacity>
                 </View>
                 <View style={{ marginTop: 10, gap: 10 }}>
-                    {cats.map((category) => (
+                    {categories.map((category) => (
                         <View key={category._id}>
                             <TouchableOpacity onPress={() => { handleOpenCat(category._id), setCatScreenOpen(true) }}>
                                 <Text style={{ fontSize: 16, fontWeight: "400" }}>{category.name}</Text>
@@ -199,7 +195,7 @@ export default function Home() {
                     ))}
                 </View>
 
-                <Modal isOpen={modalOpen}>
+                <Modal isOpen={modalOpen} withInput={true}>
                     <View>
                         <View style={styles.modalContent}>
                             <Text style={{ fontSize: 14, fontWeight: "500" }}>Adicionar Categoria</Text>
@@ -263,7 +259,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         borderRadius: 10,
         gap: 10,
-        padding: 20
+        padding: 20,
     },
     modalScreenContent: {
         backgroundColor: "#fff",
