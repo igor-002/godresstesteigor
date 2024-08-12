@@ -5,6 +5,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
 import Api from '@/src/services/api';
+import { router } from 'expo-router';
 
 type FormData = {
     name: string;
@@ -54,6 +55,7 @@ export default function Register() {
             .then(function (response) {
                 console.log(response.data);
                 setResultData(response.data.msg);
+                router.navigate('/auth/login')
                 reset();
             })
             .catch(function (error) {

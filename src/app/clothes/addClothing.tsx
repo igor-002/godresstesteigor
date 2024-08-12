@@ -4,6 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, View, ImageBackground, ScrollView, 
 import { router } from 'expo-router';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { Picker } from '@react-native-picker/picker';
 import { Dropdown } from 'react-native-element-dropdown'
 import * as yup from 'yup';
 import * as ImagePicker from 'expo-image-picker'
@@ -15,7 +16,9 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import { STORAGE } from '@/firebaseConfig';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { Category } from '@/src/services/types/types';
-import { getCats } from '@/src/services/cats';
+import { useCats } from '@/src/services/contexts/catsContext';
+import { clothingKind, clothingFit } from '@/src/services/local-data/dropDownData';
+import { useClothes } from '@/src/services/contexts/clothesContext';
 import Api from '@/src/services/api';
 
 import ModalScreen from '../components/modals/modalScreen';
@@ -55,7 +58,8 @@ export default function CameraScreen() {
     const [saveClothingScreenOpen, setSaveClothingScreenOpen] = useState<boolean>(false);
     const [moreOptions, setMoreOptions] = useState<boolean>(false);
     const [color, setColor] = useState<string>("");
-    const [categories, setCategories] = useState<Category[]>([]);
+    const { cats, getCats } = useCats();
+    const { getClothes } = useClothes();
 
     // Camera
     const cameraRef = useRef<CameraView>(null);
@@ -78,16 +82,6 @@ export default function CameraScreen() {
 
     const favoriteValue = watch('fav');
 
-    const catsData = async () => {
-        try {
-            const cats = await getCats();
-            setCategories(cats)
-        }
-        catch (error) {
-            console.log(error)
-        }
-    }
-
     useEffect(() => {
         (async () => {
             const cameraStatus = await Camera.requestCameraPermissionsAsync();
@@ -96,7 +90,7 @@ export default function CameraScreen() {
             const galleryStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
             setHasGalleryPermission(galleryStatus.status === 'granted');
 
-            catsData();
+            getCats();
         })();
     }, []);
 
@@ -149,8 +143,8 @@ export default function CameraScreen() {
         return await getDownloadURL(snapshot.ref);
     };
 
-
     const onSubmitCreateClothing: SubmitHandler<FormData> = async (data) => {
+
         if (image) {
             const imageUrl = await uploadImage(image);
             if (imageUrl) {
@@ -158,15 +152,19 @@ export default function CameraScreen() {
             }
         }
 
+        if (!data.catId) { delete data.catId };
+
         await Api.post('/clothing', data)
-        .then(response => {
-            console.log(response.data);
-            reset();
-            router.back();
-        })
-        .catch(error => {
-            console.log(error.response.data)
-        })
+            .then(response => {
+                console.log(response.data);
+                reset();
+                getClothes();
+                router.back();
+            })
+            .catch(error => {
+                console.log(error.response.data)
+            })
+
     };
 
 
@@ -182,8 +180,8 @@ export default function CameraScreen() {
                         </View>
 
                         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-                            <View style={styles.buttonContainer}>
-                                <TouchableOpacity style={styles.cameraButton} onPress={pickImage}>
+                            <View style={[styles.buttonContainer, { justifyContent: "center" }]}>
+                                <TouchableOpacity style={[styles.cameraButton, { position: "absolute", left: 1 }]} onPress={pickImage}>
                                     <MaterialIcons name='add-photo-alternate' size={20} color="white" />
                                 </TouchableOpacity>
 
@@ -192,7 +190,7 @@ export default function CameraScreen() {
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
-                                    style={styles.cameraButton}
+                                    style={[styles.cameraButton, { position: "absolute", right: 1 }]}
                                     onPress={() => { setFlash(flash === 'off' ? 'on' : 'off'); }}>
 
                                     <MaterialIcons name={flash === "on" ? "flash-on" : "flash-off"} size={20} color="white" />
@@ -228,28 +226,31 @@ export default function CameraScreen() {
 
                         <Text style={{ fontSize: 18, fontWeight: "500" }}>Salvar peça de roupa</Text>
                     </View>
-                    <ScrollView showsVerticalScrollIndicator={true} style={{ flex: 1, width: "100%", paddingHorizontal: 20, }}>
+                    <ScrollView showsVerticalScrollIndicator={true} style={{ flex: 1, width: "100%", paddingHorizontal: 20 }}>
                         <ImageBackground source={{ uri: image }} style={{ width: "100%", height: 450, marginTop: 10, alignItems: "flex-end", justifyContent: "flex-end" }} resizeMode='stretch'>
                             <TouchableOpacity onPress={() => { setValue('fav', !favoriteValue) }}>
                                 <MaterialIcons name={favoriteValue ? 'favorite' : 'favorite-border'} size={24} color={favoriteValue ? 'red' : '#fff'} style={styles.fav} />
                             </TouchableOpacity>
                         </ImageBackground>
 
-                        <Text style={styles.comment}>// Trocar os controllers por DropDown</Text>
-
-                        <View style={{ flexDirection: "row", gap: 10, justifyContent: "space-between", marginTop: 10 }}>
+                        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                             <Controller
                                 control={control}
                                 name="kind"
                                 render={({ field: { value, onChange } }) => (
-                                    <View style={[styles.controllerContainer, { width: "42%" }]}>
-                                        <TextInput
-                                            style={styles.input}
-                                            onChangeText={onChange}
-                                            placeholder="Tipo"
-                                            value={value}
-                                            autoCapitalize="none"
-                                        />
+                                    <View style={[styles.controllerContainer, { width: "40%" }]}>
+                                        <View style={styles.pickerContainer}>
+                                            <Picker
+                                                style={styles.picker}
+                                                selectedValue={value}
+                                                onValueChange={(itemValue) => onChange(itemValue)}
+                                            >
+                                                <Picker.Item label="Tipo" value="" />
+                                                {clothingKind.map(item => (
+                                                    <Picker.Item key={item.value} label={item.label} value={item.value} />
+                                                ))}
+                                            </Picker>
+                                        </View>
                                         {errors.kind && <Text style={styles.error}>{errors.kind.message}</Text>}
                                     </View>
                                 )}
@@ -259,14 +260,19 @@ export default function CameraScreen() {
                                 control={control}
                                 name="fit"
                                 render={({ field: { value, onChange } }) => (
-                                    <View style={[styles.controllerContainer, { width: "25%" }]}>
-                                        <TextInput
-                                            style={styles.input}
-                                            onChangeText={onChange}
-                                            placeholder="Caimento"
-                                            value={value}
-                                            autoCapitalize="none"
-                                        />
+                                    <View style={[styles.controllerContainer, { width: "40%" }]}>
+                                        <View style={styles.pickerContainer}>
+                                            <Picker
+                                                style={styles.picker}
+                                                selectedValue={value}
+                                                onValueChange={(itemValue) => onChange(itemValue)}
+                                            >
+                                                <Picker.Item label="Caimento" value="" />
+                                                {clothingFit.map(item => (
+                                                    <Picker.Item key={item.value} label={item.label} value={item.value} />
+                                                ))}
+                                            </Picker>
+                                        </View>
                                         {errors.fit && <Text style={styles.error}>{errors.fit.message}</Text>}
                                     </View>
                                 )}
@@ -276,9 +282,9 @@ export default function CameraScreen() {
                                 control={control}
                                 name="color"
                                 render={({ field: { value, onChange } }) => (
-                                    <View style={[styles.controllerContainer, { width: "25%" }]}>
+                                    <View style={[styles.controllerContainer, {width: "16%"}]}>
                                         <TextInput
-                                            style={[styles.input, { textAlign: "center" }, color !== "" ? { borderColor: `${color}`, borderWidth: 2 } : { borderColor: "#000", borderWidth: 1 }]}
+                                            style={[styles.input, { textAlign: "center", marginTop: 20, height: 70 }, color !== "" ? { borderColor: `${color}`, borderWidth: 2 } : { borderColor: "#000", borderWidth: 1 }]}
                                             onChangeText={(text) => { onChange(text), setColor(text) }}
                                             placeholder="Cor"
                                             value={value}
@@ -292,7 +298,7 @@ export default function CameraScreen() {
 
                         <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", marginVertical: 10 }} onPress={() => { setMoreOptions(!moreOptions) }}>
                             <MaterialIcons name={moreOptions ? 'keyboard-arrow-up' : 'keyboard-arrow-down'} size={18} color={"grey"} />
-                            <Text style={styles.comment}>Mais opções</Text>
+                            <Text style={styles.comment}>{moreOptions ? 'Menos' : 'Mais'} opções</Text>
                         </TouchableOpacity>
 
                         {moreOptions === true &&
@@ -334,7 +340,7 @@ export default function CameraScreen() {
                                         <>
                                             <Dropdown
                                                 style={styles.input}
-                                                data={categories}
+                                                data={cats}
                                                 labelField="name"
                                                 valueField="_id"
                                                 placeholder="Selecione uma categoria"
@@ -359,7 +365,7 @@ export default function CameraScreen() {
                         </TouchableOpacity>
                     </View>
                 </View>
-            </ModalScreen>
+            </ModalScreen >
         </View >
     );
 }
@@ -377,7 +383,7 @@ const styles = StyleSheet.create({
     buttonContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: "space-between"
+        justifyContent: 'space-between'
     },
     cameraButton: {
         alignItems: "center",
@@ -432,7 +438,7 @@ const styles = StyleSheet.create({
         padding: 10,
         borderWidth: 1,
         borderRadius: 5,
-        width: "100%"
+        width: "100%",
     },
     error: {
         color: 'red',
@@ -447,6 +453,17 @@ const styles = StyleSheet.create({
     },
     controllerContainer: {
         flexDirection: "column",
-        gap: 2
+        gap: 2,
+    },
+    pickerContainer: {
+        marginTop: 20,
+        borderWidth: 1,
+        borderColor: "#000",
+        borderRadius: 5,
+        height: 70
+    },
+    picker: {
+        width: "100%",
+        height: "100%"
     }
 });

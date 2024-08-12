@@ -7,6 +7,7 @@ import * as yup from 'yup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Api from '@/src/services/api';
+import { useClothes } from '@/src/services/contexts/clothesContext';
 
 type FormData = {
     email: string;
@@ -20,6 +21,7 @@ const registerSchema = yup.object({
 
 export default function Login() {
     const [resultData, setResultData] = useState(null);
+    const { getClothes } = useClothes()
 
     const form = useForm<FormData>({
         defaultValues: {
@@ -43,6 +45,7 @@ export default function Login() {
                 const { token } = response.data;
                 await AsyncStorage.setItem('jwtToken', token);
 
+                getClothes();
                 router.replace('(tabs)');
             })
             .catch(function (error) {
