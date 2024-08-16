@@ -1,16 +1,16 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList, Image, Dimensions } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
-import { Category } from '@/src/services/types/types';
 import { Clothing } from '@/src/services/types/types';
 import { useCats } from '@/src/services/contexts/catsContext';
 import Modal from '../components/modals/modal';
 import ModalScreen from '../components/modals/modalScreen';
+import { ClothesList } from '../components/flatLists/clothesList';
 import Api from '@/src/services/api';
 
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
@@ -32,7 +32,7 @@ export default function Home() {
     const [surname, setSurname] = useState<string | null>(null);
 
     // getCatClothes
-    const [catClothes, setCatClothes] = useState<Clothing[] | null>([]);
+    const [catClothes, setCatClothes] = useState<Clothing[]>([]);
 
     // modals
     const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -143,13 +143,11 @@ export default function Home() {
         setShowButton("");
     };
 
-    const handleCloseCat = () => setOpenCatId(null);
-
-    const renderItem = ({ item }: { item: Clothing }) => (
-        <TouchableOpacity key={item._id} style={styles.itemContainer}>
-            <Image source={{ uri: item.image }} style={styles.image} />
-        </TouchableOpacity>
-    );
+    const handleCloseCat = () => {
+        setCatScreenOpen(false), 
+        setOpenCatId(null), 
+        setResultData(null)
+    }
 
     return (
         <View style={styles.container}>
@@ -187,10 +185,10 @@ export default function Home() {
                             </TouchableOpacity>
 
                             {openCatId === category._id && (
-                                <ModalScreen isOpen={catScreenOpen}>
+                                <ModalScreen isOpen={catScreenOpen} onRequestClose={handleCloseCat}>
                                     <View style={styles.modalScreenContent}>
                                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%", paddingHorizontal: 20 }}>
-                                            <TouchableOpacity onPress={() => { setCatScreenOpen(false), handleCloseCat(), setResultData(null) }}>
+                                            <TouchableOpacity onPress={handleCloseCat}>
                                                 <FontAwesome5 name="arrow-left" size={18} />
                                             </TouchableOpacity>
                                             <Controller
@@ -225,16 +223,7 @@ export default function Home() {
                                                 </TouchableOpacity>
                                             </View>
                                         )}
-                                        <View style={{ alignItems: "center" }}>
-                                            <FlatList
-                                                style={{ marginTop: 20 }}
-                                                data={catClothes}
-                                                renderItem={renderItem}
-                                                keyExtractor={(item) => item._id}
-                                                numColumns={3}
-                                                showsVerticalScrollIndicator={false}
-                                            />
-                                        </View>
+                                        <ClothesList clothes={catClothes} canOpen={false} />
                                     </View>
                                 </ModalScreen>
                             )}
@@ -242,8 +231,8 @@ export default function Home() {
                     ))}
                 </View>
 
-                <Modal isOpen={modalOpen} withInput={true}>
-                    <View>
+                <Modal isOpen={modalOpen} withInput={true} onRequestClose={() => { setModalOpen(false), setResultData(null) }}>
+                    <View style={{ width: width * 0.5 }}>
                         <View style={styles.modalContent}>
                             <Text style={{ fontSize: 14, fontWeight: "500" }}>Adicionar Categoria</Text>
 
@@ -352,17 +341,5 @@ const styles = StyleSheet.create({
         marginTop: 20,
         borderRadius: 10,
         gap: 5
-    },
-    itemContainer: {
-        margin: 5,
-        backgroundColor: "#eee",
-        padding: 10,
-        borderRadius: 10,
-        alignItems: 'center',
-    },
-    image: {
-        height: width * 0.25,
-        width: width * 0.25,
-        borderRadius: 10
     },
 });

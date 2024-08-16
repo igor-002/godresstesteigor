@@ -217,7 +217,7 @@ export default function CameraScreen() {
                     </ImageBackground>
                 </View >
             }
-            <ModalScreen isOpen={saveClothingScreenOpen} withInput={true}>
+            <ModalScreen isOpen={saveClothingScreenOpen} withInput={true} onRequestClose={() => {setSaveClothingScreenOpen(false)}}>
                 <View style={styles.modalScreenContent}>
                     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", width: "100%", marginHorizontal: 20 }}>
                         <TouchableOpacity onPress={() => { setSaveClothingScreenOpen(false) }} style={{ position: "absolute", left: 20 }}>
@@ -227,11 +227,13 @@ export default function CameraScreen() {
                         <Text style={{ fontSize: 18, fontWeight: "500" }}>Salvar peça de roupa</Text>
                     </View>
                     <ScrollView showsVerticalScrollIndicator={true} style={{ flex: 1, width: "100%", paddingHorizontal: 20 }}>
-                        <ImageBackground source={{ uri: image }} style={{ width: "100%", height: 450, marginTop: 10, alignItems: "flex-end", justifyContent: "flex-end" }} resizeMode='stretch'>
-                            <TouchableOpacity onPress={() => { setValue('fav', !favoriteValue) }}>
-                                <MaterialIcons name={favoriteValue ? 'favorite' : 'favorite-border'} size={24} color={favoriteValue ? 'red' : '#fff'} style={styles.fav} />
-                            </TouchableOpacity>
-                        </ImageBackground>
+                        <View style={{ width: "100%", height: 450, marginTop: 10, borderRadius: 10, overflow: 'hidden' }}>
+                            <ImageBackground source={{ uri: image }} style={{ alignItems: "flex-end", justifyContent: "flex-end", flex: 1 }} resizeMode='stretch'>
+                                <TouchableOpacity onPress={() => { setValue('fav', !favoriteValue) }}>
+                                    <MaterialIcons name={favoriteValue ? 'favorite' : 'favorite-border'} size={24} color={favoriteValue ? 'red' : '#fff'} style={styles.fav} />
+                                </TouchableOpacity>
+                            </ImageBackground>
+                        </View>
 
                         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                             <Controller
@@ -282,7 +284,7 @@ export default function CameraScreen() {
                                 control={control}
                                 name="color"
                                 render={({ field: { value, onChange } }) => (
-                                    <View style={[styles.controllerContainer, {width: "16%"}]}>
+                                    <View style={[styles.controllerContainer, { width: "16%" }]}>
                                         <TextInput
                                             style={[styles.input, { textAlign: "center", marginTop: 20, height: 70 }, color !== "" ? { borderColor: `${color}`, borderWidth: 2 } : { borderColor: "#000", borderWidth: 1 }]}
                                             onChangeText={(text) => { onChange(text), setColor(text) }}
