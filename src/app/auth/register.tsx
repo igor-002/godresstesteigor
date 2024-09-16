@@ -8,6 +8,8 @@ import Fonts from '@/src/services/utils/Fonts';
 
 import Api from '@/src/services/api';
 import { router } from 'expo-router';
+import { globalColors } from '@/src/styles/global';
+import { MyButton } from '../components/button/button';
 
 type FormData = {
     name: string;
@@ -69,9 +71,14 @@ export default function Register() {
     return (
         <View style={styles.container}>
 
+
+            <TouchableOpacity style={styles.containVoltar} onPress={() => router.back()}>
+                <Image style={styles.imgVoltar} source={require('../../../assets/icons/voltar.png')} />
+            </TouchableOpacity >
+
             <View style={styles.containlogotxt}>
                 <Text style={styles.titulo} >Cadastre-se</Text>
-                <Image style={styles.logoimg} source={require('../../../assets/images/logoGpreta.png')} />
+                <Image style={styles.logoimg} source={require('../../../assets/images/gPurple.png')} />
             </View>
 
             <Controller
@@ -160,6 +167,8 @@ export default function Register() {
                 <Text style={styles.txtBNT}>Cadastrar-se</Text>
             </TouchableOpacity>
 
+            <MyButton onPress={handleSubmit(onSubmit)} title='Cadastre-se Component'/>
+
             {resultData && (
                 <View style={styles.resultContainer}>
                     <Text style={{ fontWeight: "500", marginBottom: 10 }}>Status:</Text>
@@ -173,66 +182,76 @@ export default function Register() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: "center",
-        padding:20,
+        padding: 20,
         gap: 10
     },
 
-    containlogotxt:{
-        display:'flex',
-        flexDirection:'row',
-        alignItems:'center',
-        justifyContent:'flex-start',
-        marginBottom:40,
+    containVoltar: {
+        paddingTop: '15%',
     },
 
-    titulo:{
-        fontFamily:Fonts['montserrat-black'],
-        fontSize:32,
-        color:'#593C9D',
-        paddingRight:15,
+    imgVoltar: {
+        height: 30,
+        width: 30,
     },
 
-    logoimg:{
-        height:60,
-        width:60,
-        resizeMode:'contain',
+    containlogotxt: {
+        marginTop: 70,
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 40,
     },
 
-    
+    titulo: {
+        fontFamily: Fonts['montserrat-extrabold'],
+        fontSize: 32,
+        color: globalColors.primary,
+        paddingRight: 15,
+    },
+
+    logoimg: {
+        height: 55,
+        width: 55,
+        resizeMode: 'contain',
+    },
+
+
 
     input: {
         backgroundColor: "#fff",
         padding: 10,
         width: "100%",
-        borderWidth: 1,
+        borderWidth: 1.5,
         borderRadius: 10,
-        borderColor:'#A7A7A7',
+        borderColor: globalColors.primary,
         fontFamily: Fonts['montserrat-regular'],
-        fontSize:16,
+        fontSize: 16,
+
     },
 
     button: {
-        backgroundColor: "#593C9D",
+        backgroundColor: globalColors.secundary,
         borderRadius: 5,
         paddingVertical: 10,
-        color: "#fff",
+        color: globalColors.white,
         width: "100%",
         alignItems: "center",
         marginTop: 50,
     },
 
-    BNTcadastro:{
-        backgroundColor:'#593C9D',
-        borderRadius:10,
-        alignItems:'center',
-        paddingVertical:15,
-        marginTop:20,
+    BNTcadastro: {
+        backgroundColor: globalColors.primary,
+        borderRadius: 10,
+        alignItems: 'center',
+        paddingVertical: 15,
+        marginTop: 20,
     },
 
-    txtBNT:{
-        color:'#fff',
-        fontFamily:Fonts['montserrat-black'],
+    txtBNT: {
+        color: globalColors.white,
+        fontFamily: Fonts['montserrat-black'],
     },
 
     error: {
@@ -245,7 +264,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
         padding: 10,
         borderRadius: 5,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: globalColors.primary,
         width: '100%',
         gap: 10
     },
